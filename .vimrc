@@ -143,11 +143,11 @@ set ffs=unix,dos,mac
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Text, tab and indent related
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Use spaces instead of tabs
-"set expandtab
+" Deafult Use spaces instead of tabs
+set expandtab
 
 " Use tabs instead of spaces
-set noexpandtab
+" set noexpandtab
 
 " Be smart when using tabs ;)
 set smarttab
@@ -510,7 +510,7 @@ Plug 'nathanaelkane/vim-indent-guides'
 
 " Adds Icons to Your Plugins
 Plug 'ryanoasis/vim-devicons'
-
+Plug 'tpope/vim-surround'
 " Used for amazon plugins
 " Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " Make sure you use single quotes
@@ -550,6 +550,14 @@ Plug 'vifm/vifm.vim'
 " Go lang tools refer : https://github.com/fatih/vim-go/wiki/Tutorial
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 
+" Git blame
+Plug 'rhysd/git-messenger.vim'
+
+Plug 'mkitt/tabline.vim'
+
+" Debugger for python
+" add viminspector 
+
 " Initialize plugin system
 call plug#end()
 
@@ -572,9 +580,37 @@ noremap <Leader>p "+p
 noremap <Leader>Y "*y
 noremap <Leader>P "*p
 
+nnoremap <Leader>g :<C-u>call gitblame#echo()<CR>
+
 nnoremap <silent> <leader>d :vsplit <CR>
 nnoremap <silent> <leader>s :split <CR>
 nmap <F2> :TagbarToggle<CR>
+
+
+" git messenger
+let g:git_messenger_floating_win_opts = { 'border': 'single' }
+let g:git_messenger_popup_content_margins = v:false
+
+" Normal color in popup window with 'CursorLine'
+hi link gitmessengerPopupNormal CursorLine
+
+" Header such as 'Commit:', 'Author:' with 'Statement' highlight group
+hi link gitmessengerHeader Statement
+
+" Commit hash at 'Commit:' header with 'Special' highlight group
+hi link gitmessengerHash Special
+
+" History number at 'History:' header with 'Title' highlight group
+hi link gitmessengerHistory Title
+function! s:setup_git_messenger_popup() abort
+    " Your favorite configuration here
+
+    " For example, set go back/forward history to <C-o>/<C-i>
+    nmap <buffer><C-o> o
+    nmap <buffer><C-i> O
+endfunction
+autocmd FileType gitmessengerpopup call <SID>setup_git_messenger_popup()
+
 
 ":set relativenumber number
 :set nonumber
@@ -589,6 +625,9 @@ nmap <F2> :TagbarToggle<CR>
 nmap <C-L><C-L> :set invrelativenumber<CR>
 nmap <C-H><C-H> :/\s\+$<CR>
 
+
+" quote for a word
+nmap <C-Q><C-Q> ysiw"<CR>
 " VIFM
 nmap <C-F><C-F> :Vifm .<CR>
 " Map Ctrl-Backspace to delete the previous word in insert mode.
@@ -671,7 +710,7 @@ let g:closetag_xhtml_filenames = '*.xhtml,*.jsx, *.js'
 " Highlight tab name
 function! HiTabs()
     syntax match TAB /\t/ containedin=ALL
-    highlight TAB ctermbg=red ctermfg=white cterm=underline
+highlight TAB ctermbg=red ctermfg=white cterm=underline
 endfunction
 au BufEnter,BufRead * call HiTabs()
 
@@ -744,6 +783,9 @@ syn region pythonDocstring start=+^\s*[uU]\?[rR]\?'''+ end=+'''+ keepend exclude
 
 " disable the bell sound
 set belloff=all
+
+" Override tab behaviour for Golang
+autocmd FileType go setlocal noexpandtab
 
 " Put swap, backup and undo files in fixed directories,
 " instead of the working directory of the file being edited
