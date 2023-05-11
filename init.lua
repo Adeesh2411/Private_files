@@ -4,6 +4,20 @@ vim.cmd('source ~/.vimrc')
 -- enable true color support
 vim.opt.termguicolors = true
 
+-- Set text width to 80 characters
+vim.opt.textwidth = 80
+
+-- Automatically wrap text when saving a file
+vim.cmd('highlight ColorColumn ctermbg=gray')
+
+-- Blink the cursor
+--vim.cmd('set guicursor=i:blinkwait700-blinkon400-blinkoff250')
+vim.cmd('set guicursor=n-v-c-sm:block,i-ci-ve:ver25-Cursor,r-cr-o:hor20')
+-- change the cursor style
+-- vim.cmd(let &t_SI.="\e[5 q")
+-- vim.cmd(let &t_SR.="\e[4 q")
+-- vim.cmd(let &t_EI.="\e[1 q")
+
 -- set leader key
 -- vim.g.mapleader = ','
 
@@ -27,7 +41,6 @@ Plug 'nvim-tree/nvim-web-devicons'
 Plug 'romgrk/barbar.nvim'
 Plug 'TimUntersberger/neofs'
 Plug 'preservim/nerdcommenter'
-Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'rohit-px2/nvui'
 
 -- color highlight
@@ -47,19 +60,150 @@ Plug 'winston0410/range-highlight.nvim'
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'SmiteshP/nvim-gps'
 
-Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'neovim/nvim-lspconfig'
 Plug 'fatih/vim-go'
 Plug 'dense-analysis/ale'
+Plug 'preservim/tagbar'
+
+-- Neo AI plugins
+Plug 'MunifTanjim/nui.nvim'
+Plug 'Bryley/neoai.nvim'
+
+-- nerd tree kind of 
+Plug 'nvim-tree/nvim-tree.lua'
+Plug 'vifm/vifm.vim'
+
+Plug 'numToStr/Comment.nvim'
+
+-- Flutter development
+Plug 'nvim-lua/plenary.nvim'
+Plug 'stevearc/dressing.nvim'
+Plug 'akinsho/flutter-tools.nvim'
 
 vim.call('plug#end')
 
 
+vim.cmd[[ 
+" ale configuration
+let g:ale_linters = {'python': ['flake8', 'mypy'],
+            \'cpp': ['cc', 'clang', 'cppcheck']
+            \}
+let g:ale_fixers = {'*':[], 'python': ['autoimport', 'black', 'isort'], 
+            \'cpp': ['clang-format'], 
+            \'dart': ['dartfmt', 'dart-format']
+            \}
+let g:ale_linters_ignore = {'cpp': ['clangcheck', 'clangtidy']}
+let g:ale_cpp_cc_options = "-std=c++17 -Wall"
+let g:ale_cpp_clangd_options = "-std=c++17 -Wall"
+
+
+let g:ale_lint_on_save = 1 
+let g:ale_fix_on_save = 1
+let g:ale_lint_on_enter = 0
+
+" ale completion engine
+let g:ale_completion_enabled = 1
+
+let g:ale_set_balloons = 1
+let g:ale_open_list = 0 
+let g:ale_sign_error = '●'
+let g:ale_sign_warning = '.'
+let g:ale_floating_window_border = repeat([''], 8)
+let g:ale_set_highlights = 1 
+
+" Set this. Airline will handle the rest.
+let g:airline#extensions#ale#enabled = 1
+
+
+]]
+
+
+-- alternatively you can override the default configs
+require("flutter-tools").setup {
+  ui = {
+    -- the border type to use for all floating windows, the same options/formats
+    -- used for ":h nvim_open_win" e.g. "single" | "shadow" | {<table-of-eight-chars>}
+    border = "rounded"
+    -- This determines whether notifications are show with `vim.notify` or with the plugin's custom UI
+    -- please note that this option is eventually going to be deprecated and users will need to
+    -- depend on plugins like `nvim-notify` instead.
+  },
+  decorations = {
+    statusline = {
+      -- set to true to be able use the 'flutter_tools_decorations.app_version' in your statusline
+      -- this will show the current version of the flutter app from the pubspec.yaml file
+      app_version = false,
+      -- set to true to be able use the 'flutter_tools_decorations.device' in your statusline
+      -- this will show the currently running device if an application was started with a specific
+      -- device
+      device = false,
+      -- set to true to be able use the 'flutter_tools_decorations.project_config' in your statusline
+      -- this will show the currently selected project configuration
+      project_config = false,
+    }
+  },
+  fvm = false, -- takes priority over path, uses <workspace>/.fvm/flutter_sdk if enabled
+  widget_guides = {
+    enabled = true,
+  },
+  closing_tags = {
+    highlight = "ErrorMsg", -- highlight for the closing tag
+    prefix = ">", -- character to use for close tag e.g. > Widget
+    enabled = false -- set to false to disable
+  },
+  dev_log = {
+    enabled = true,
+    notify_errors = false, -- if there is an error whilst running then notify the user
+    open_cmd = "tabedit", -- command to use to open the log buffer
+  },
+  dev_tools = {
+    autostart = false, -- autostart devtools server if not detected
+    auto_open_browser = false, -- Automatically opens devtools in the browser
+  },
+  outline = {
+    open_cmd = "30vnew", -- command to use to open the outline buffer
+    auto_open = false -- if true this will open the outline automatically when it is first populated
+  },
+  lsp = {
+    color = { -- show the derived colours for dart variables
+      enabled = false, -- whether or not to highlight color variables at all, only supported on flutter >= 2.10
+      background = false, -- highlight the background
+      background_color = nil, -- required, when background is transparent (i.e. background_color = { r = 19, g = 17, b = 24},)
+      foreground = false, -- highlight the foreground
+      virtual_text = true, -- show the highlight using virtual text
+      virtual_text_str = "â– ", -- the virtual text character to highlight
+    },
+    on_attach = my_custom_on_attach,
+    capabilities = my_custom_capabilities, -- e.g. lsp_status capabilities
+    --- OR you can specify a function to deactivate or change or control how the config is created
+    -- see the link below for details on each option:
+    -- https://github.com/dart-lang/sdk/blob/master/pkg/analysis_server/tool/lsp_spec/README.md#client-workspace-configuration
+    settings = {
+      showTodos = true,
+      completeFunctionCalls = true,
+      analysisExcludedFolders = {"<path-to-flutter-sdk-packages>"},
+      renameFilesWithClasses = "prompt", -- "always"
+      enableSnippets = true,
+      updateImportsOnRename = true, -- Whether to update imports and other directives when files are renamed. Required for `FlutterRename` command.
+    }
+  }
+}
 
 
 
+-- Nerd tree / nvim tree
+-- disable netrw at the very start of your init.lua (strongly advised)
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 
+-- set termguicolors to enable highlight groups
+vim.opt.termguicolors = true
 
+-- empty setup using defaults
+require("nvim-tree").setup()
+
+-- vifm for neovim
+-- require("vifm").setup()
 
 
 
@@ -71,6 +215,15 @@ require("nvim-gps").setup()
 -- })
 
 require'colorizer'.setup()
+
+-- or with custom configuration
+require('Comment').setup({
+    ignore = '^$',
+    toggler = {
+        line = '<leader>c',
+        block = '<leader>b',
+    },
+})
 
 require('neofs').setup {
     devicons = true
@@ -133,12 +286,18 @@ require('telescope').setup {
     }
 }
 
+
+
 -- define mappings
 local map = vim.api.nvim_set_keymap
 map('n', '<Leader>ff', '<Cmd>Telescope find_files<CR>', { noremap = true, silent = true })
 map('n', '<Leader>fg', '<Cmd>Telescope live_grep<CR>', { noremap = true, silent = true })
 map('n', '<Leader>fb', '<Cmd>Telescope buffers<CR>', { noremap = true, silent = true })
 map('n', '<Leader>fh', '<Cmd>Telescope help_tags<CR>', { noremap = true, silent = true })
+map('n', '<Leader>ee', '<Cmd>NvimTreeToggle<CR>', {noremap = true, silent = true})
+map('n', '<Leader>ef', '<Cmd>NvimTreeFocus<CR>', {noremap = true, silent = true})
+map('n', '<Leader>er', '<Cmd>NvimTreeRefresh<CR>', {noremap = true, silent = true})
+
 vim.keymap.set("n", "<leader>fs", function()
   require("neofs").open()
 end, {noremap = true})
@@ -154,10 +313,10 @@ require'barbar'.setup {
 
   -- Enable/disable animations
   animation = true,
-
-  icons = {
+      icons = {
     -- Configure the base icons on the bufferline.
-    buffer_index = true,
+    -- Valid options to display the buffer index and -number are `true`, 'superscript' and 'subscript'
+    buffer_index = false,
     buffer_number = false,
     button = '',
     -- Enables / disables diagnostic symbols
@@ -166,6 +325,11 @@ require'barbar'.setup {
       [vim.diagnostic.severity.WARN] = {enabled = false},
       [vim.diagnostic.severity.INFO] = {enabled = false},
       [vim.diagnostic.severity.HINT] = {enabled = true},
+    },
+    gitsigns = {
+      added = {enabled = true, icon = '+'},
+      changed = {enabled = true, icon = '~'},
+      deleted = {enabled = true, icon = '-'},
     },
     filetype = {
       -- Sets the icon's highlight group.
@@ -182,7 +346,7 @@ require'barbar'.setup {
     modified = {button = '●'},
     pinned = {button = '車', filename = true, separator = {right = ''}},
 
-  },
+   },
 
 
 
@@ -213,4 +377,87 @@ require'barbar'.setup {
     Outline = {event = 'BufWinLeave', text = 'symbols-outline'},
   },
 
+}
+
+
+require('neoai').setup{
+    -- Below are the default options, feel free to override what you would like changed
+    ui = {
+        output_popup_text = "NeoAI",
+        input_popup_text = "Prompt",
+        width = 30,      -- As percentage eg. 30%
+        output_popup_height = 80, -- As percentage eg. 80%
+        submit = "<Enter>", -- Key binding to submit the prompt
+    },
+    models = {
+        {
+            name = "openai",
+            model = "gpt-3.5-turbo",
+            params = nil,
+        },
+    },
+    register_output = {
+        ["g"] = function(output)
+            return output
+        end,
+        ["c"] = require("neoai.utils").extract_code_snippets,
+    },
+    inject = {
+        cutoff_width = 75,
+    },
+    prompts = {
+        context_prompt = function(context)
+            return "Hey, I'd like to provide some context for future "
+                .. "messages. Here is the code/text that I want to refer "
+                .. "to in our upcoming conversations:\n\n"
+                .. context
+        end,
+    },
+    mappings = {
+        ["select_up"] = "<C-k>",
+        ["select_down"] = "<C-j>",
+    },
+    shortcuts = {
+        {
+            name = "textify",
+            key = "<leader>as",
+            desc = "fix text with AI",
+            use_context = true,
+            prompt = [[
+                Please rewrite the text to make it more readable, clear,
+                concise, and fix any grammatical, punctuation, or spelling
+                errors
+            ]],
+            modes = { "v" },
+            strip_function = nil,
+        },
+        {
+            name = "gitcommit",
+            key = "<leader>ag",
+            desc = "generate git commit message",
+            use_context = false,
+            prompt = function ()
+                return [[
+                    Using the following git diff generate a consise and
+                    clear git commit message, with a short title summary
+                    that is 75 characters or less:
+                ]] .. vim.fn.system("git diff --cached")
+            end,
+            modes = { "n" },
+            strip_function = nil,
+        },
+    },
+}
+require'nvim-treesitter.configs'.setup {
+  highlight = {
+    enable = true,
+    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+    -- Using this option may slow down your editor, and you may see some duplicate highlights.
+    -- Instead of true it can also be a list of languages
+    additional_vim_regex_highlighting = false,
+  },
+  indent = {
+    enable = true
+  },
 }
