@@ -37,31 +37,21 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'nvim-tree/nvim-web-devicons'
-Plug 'nvim-tree/nvim-web-devicons'
+
 Plug 'romgrk/barbar.nvim'
 Plug 'TimUntersberger/neofs'
 Plug 'preservim/nerdcommenter'
 Plug 'rohit-px2/nvui'
 
 -- color highlight
-Plug 'norcalli/nvim-colorizer.lua'
-
--- range highlight
-Plug 'winston0410/range-highlight.nvim'
-
--- debugger
--- Plug 'mfussenegger/nvim-dap'
--- Plug 'rcarriga/nvim-dap-ui'
-
--- documentation viewer
--- Plug 'folke/neodev.nvim'
+Plug 'NvChad/nvim-colorizer.lua'
 
 -- function scope in status line
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'SmiteshP/nvim-gps'
 
 Plug 'neovim/nvim-lspconfig'
-Plug 'fatih/vim-go'
+-- Plug 'fatih/vim-go'
 Plug 'dense-analysis/ale'
 Plug 'preservim/tagbar'
 
@@ -80,42 +70,62 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'stevearc/dressing.nvim'
 Plug 'akinsho/flutter-tools.nvim'
 
+-- Plug 'sebdah/vim-delve'
+
+-- Golang development
+Plug 'fatih/vim-go'
+Plug 'AndrewRadev/splitjoin.vim'
+Plug 'SirVer/ultisnips'
+Plug 'ctrlpvim/ctrlp.vim'
+
 vim.call('plug#end')
 
+-- Go Plugin configuration
+vim.cmd[[
+let g:go_list_type = "quickfix"
+let g:go_highlight_types = 1
+let g:go_highlight_fields = 1
+let g:go_highlight_functions = 1
+let g:go_highlight_function_calls = 1
+let g:go_highlight_operators = 1
+let g:go_highlight_extra_types = 1
+nnoremap <leader>gd <cmd>Telescope gopls document_symbols<cr>
+nnoremap <leader>gD <cmd>Telescope gopls definitions<cr>
+]]
 
-vim.cmd[[ 
-" ale configuration
-let g:ale_linters = {'python': ['flake8', 'mypy'],
-            \'cpp': ['cc', 'clang', 'cppcheck']
-            \}
-let g:ale_fixers = {'*':[], 'python': ['autoimport', 'black', 'isort'], 
-            \'cpp': ['clang-format'], 
-            \'dart': ['dartfmt', 'dart-format']
-            \}
-let g:ale_linters_ignore = {'cpp': ['clangcheck', 'clangtidy']}
-let g:ale_cpp_cc_options = "-std=c++17 -Wall"
-let g:ale_cpp_clangd_options = "-std=c++17 -Wall"
 
 
-let g:ale_lint_on_save = 1 
-let g:ale_fix_on_save = 1
-let g:ale_lint_on_enter = 0
+vim.cmd[[
+    let g:ale_linters = {'python': ['flake8', 'mypy'],
+    \'cpp': ['cc', 'clang', 'cppcheck']
+    \}
+    let g:ale_fixers = {'*':[], 'python': ['autoimport', 'black', 'isort'],
+    \'cpp': ['clang-format'],
+    \'dart': ['dartfmt', 'dart-format']
+    \}
+    let g:ale_linters_ignore = {'cpp': ['clangcheck', 'clangtidy']}
+    let g:ale_cpp_cc_options = "-std=c++17 -Wall"
+    let g:ale_cpp_clangd_options = "-std=c++17 -Wall"
 
-" ale completion engine
-let g:ale_completion_enabled = 1
+    let g:ale_lint_on_save = 1
+    let g:ale_fix_on_save = 1
+    let g:ale_lint_on_enter = 0
 
-let g:ale_set_balloons = 1
-let g:ale_open_list = 0 
-let g:ale_sign_error = '●'
-let g:ale_sign_warning = '.'
-let g:ale_floating_window_border = repeat([''], 8)
-let g:ale_set_highlights = 1 
+    " ale completion engine
+    let g:ale_completion_enabled = 1
 
-" Set this. Airline will handle the rest.
-let g:airline#extensions#ale#enabled = 1
-
+    let g:ale_set_balloons = 1
+    let g:ale_open_list = 0
+    let g:ale_sign_error = '●'
+    let g:ale_sign_warning = '.'
+    let g:ale_floating_window_border = repeat([''], 8)
+    let g:ale_set_highlights = 1
+    let g:ale_virtualtext_cursor = 'disabled'
 
 ]]
+
+vim.g.go_doc_popup_window = 1
+require('lspconfig').gopls.setup{}
 
 
 -- alternatively you can override the default configs
@@ -196,26 +206,12 @@ require("flutter-tools").setup {
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
--- set termguicolors to enable highlight groups
-vim.opt.termguicolors = true
-
 -- empty setup using defaults
 require("nvim-tree").setup()
 
--- vifm for neovim
--- require("vifm").setup()
-
-
-
+require("colorizer").setup {
+}
 -- Default config
-require("nvim-gps").setup()
-
--- require("neodev").setup({
---  library = { plugins = { "nvim-dap-ui" }, types = true },
--- })
-
-require'colorizer'.setup()
-
 -- or with custom configuration
 require('Comment').setup({
     ignore = '^$',
@@ -285,7 +281,6 @@ require('telescope').setup {
         qflist_previewer = require'telescope.previewers'.vim_buffer_qflist.new,
     }
 }
-
 
 
 -- define mappings
@@ -448,16 +443,40 @@ require('neoai').setup{
         },
     },
 }
-require'nvim-treesitter.configs'.setup {
-  highlight = {
-    enable = true,
-    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-    -- Using this option may slow down your editor, and you may see some duplicate highlights.
-    -- Instead of true it can also be a list of languages
-    additional_vim_regex_highlighting = false,
-  },
-  indent = {
-    enable = true
-  },
-}
+
+function GoDocWithTelescope()
+   vim.cmd(':GoDoc')
+   local results = vim.fn.getqflist()
+   require('telescope.builtin').quickfix({
+      prompt_title = ':GoDoc results',
+      entries = results,
+      layout_config = {
+         width = 0.9,
+         height = 0.6,
+         preview_cutoff = 120,
+         horizontal = {preview_width = 0.5},
+         vertical = {preview_height = 0.5},
+         borders = true,
+         border = {
+            {"╭", "FloatBorder"},
+            {"─", "FloatBorder"},
+            {"╮", "FloatBorder"},
+            {"│", "FloatBorder"},
+            {"╯", "FloatBorder"},
+            {"─", "FloatBorder"},
+            {"╰", "FloatBorder"},
+            {"│", "FloatBorder"},
+         },
+         borderhighlight = "FloatBorder",
+         bordercolor = "white",
+         prompt_position = 'top',
+         padding = {
+            top = 10,
+            bottom = 10,
+            left = 10,
+            right = 10,
+         },
+      },
+   })
+end
+vim.api.nvim_set_keymap('n', '<leader>gd', ':lua GoDocWithTelescope()<CR>', {noremap = true, silent = true})
