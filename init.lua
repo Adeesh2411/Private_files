@@ -60,7 +60,7 @@ Plug 'preservim/tagbar'
 
 -- Language support
 Plug 'tpope/vim-projectionist'
-Plug 'neoclide/coc.nvim'
+-- Plug 'neoclide/coc.nvim'
 Plug 'jiangmiao/auto-pairs'
 
 
@@ -92,6 +92,20 @@ Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-telescope/telescope-media-files.nvim'
 Plug 'LukasPietzschmann/telescope-tabs'
 Plug 'arjunmahishi/flow.nvim'
+
+Plug 'neovim/nvim-lspconfig'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'hrsh7th/nvim-cmp'
+
+-- For vsnip users.
+Plug 'hrsh7th/cmp-vsnip'
+Plug 'hrsh7th/vim-vsnip'
+
+
+Plug 'ray-x/lsp_signature.nvim'
 vim.call('plug#end')
 
 
@@ -107,46 +121,63 @@ let g:go_highlight_extra_types = 1
 ]]
 
 
-
+-- Flutter Configuration
 vim.cmd[[
     let g:gruvbox_contrast_dark = 'hard'
     let g:gruvbox_invert_selection=0
     let g:dart_format_on_save = 1
     let g:dartfmt_options = ['--fix', '--line-length 120']
+]]
 
-    let g:coc_global_extensions = [
-      \ 'coc-snippets',
-      \ 'coc-tsserver',
-      \ 'coc-eslint', 
-      \ 'coc-prettier', 
-      \ 'coc-json', 
-      \ 'coc-flutter',
-      \ 'coc-snippets',
-      \ 'coc-yaml',
-      \ 'coc-tslint-plugin',
-      \ 'coc-tsserver',
-      \ 'coc-emmet',
-      \ 'coc-css',
-      \ 'coc-html',
-      \ 'coc-json',
-      \ ]
 
-    nmap <silent> gd <Plug>(coc-definition)
-    nmap <silent> gy <Plug>(coc-type-definition)
-    nmap <silent> gi <Plug>(coc-implementation)
-    nmap <silent> gr <Plug>(coc-references)
+-- ALE Configuration
+vim.cmd[[ 
+    let g:ale_linters = {'python': ['flake8', 'mypy'],
+    \'cpp': ['cc', 'clang', 'cppcheck']
+    \}
+    let g:ale_fixers = {'*':[], 'python': ['autoimport', 'black', 'isort'],
+    \'cpp': ['clang-format'],
+    \'dart': ['dartfmt', 'dart-format']
+    \}
+    let g:ale_linters_ignore = {'cpp': ['clangcheck', 'clangtidy']}
+    let g:ale_cpp_cc_options = "-std=c++17 -Wall"
+    let g:ale_cpp_clangd_options = "-std=c++17 -Wall"
+
+    let g:ale_lint_on_save = 0
+    let g:ale_fix_on_save = 1
+    let g:ale_lint_on_enter = 0
+
+    " ale completion engine
+    let g:ale_completion_enabled = 0
+
+    let g:ale_set_balloons = 1
+    let g:ale_open_list = 0
+    let g:ale_sign_error = '●'
+    let g:ale_sign_warning = '.'
+    let g:ale_floating_window_border = repeat([''], 8)
+    let g:ale_set_highlights = 1
+    let g:ale_virtualtext_cursor = 'disabled'
+    let g:ale_lint_on_insert_leave = 1
 ]]
 
 vim.g.go_doc_popup_window = 1
 
 
--- alternatively you can override the default configs
-require("flutter-tools").setup {
-  widget_guides = {
-    enabled = true,
-  },
 
+require('go').setup()
+
+require "lsp_signature".setup({
+    bind = false, -- This is mandatory, otherwise border config won't get registered.
+    max_width = 100,
+  })
+
+-- alternatively you can override the default configs
+require('flutter-tools').setup{
+    widget_guides = {
+        enabled = true,
+    }
 }
+
 require("telescope").load_extension("flutter")
 require('telescope').load_extension('media_files')
 require('telescope-tabs').setup{}
@@ -246,7 +277,6 @@ local map = vim.api.nvim_set_keymap
 map('n', '<Leader>ff', '<Cmd>Telescope find_files<CR>', { noremap = true, silent = true })
 map('n', '<Leader>fg', '<Cmd>Telescope live_grep<CR>', { noremap = true, silent = true })
 map('n', '<Leader>fb', '<Cmd>Telescope buffers<CR>', { noremap = true, silent = true })
-map('n', '<Leader>fh', '<Cmd>Telescope help_tags<CR>', { noremap = true, silent = true })
 map('n', '<Leader>ee', '<Cmd>NvimTreeToggle<CR>', {noremap = true, silent = true})
 map('n', '<Leader>ef', '<Cmd>NvimTreeFocus<CR>', {noremap = true, silent = true})
 map('n', '<Leader>er', '<Cmd>NvimTreeRefresh<CR>', {noremap = true, silent = true})
@@ -333,7 +363,6 @@ require'barbar'.setup {
   },
 
 }
-require('go').setup()
 
 require('neoai').setup{
     -- Below are the default options, feel free to override what you would like changed
@@ -404,39 +433,149 @@ require('neoai').setup{
     },
 }
 
-function GoDocWithTelescope()
-   vim.cmd(':GoDoc')
-   local results = vim.fn.getqflist()
-   require('telescope.builtin').quickfix({
-      prompt_title = ':GoDoc results',
-      entries = results,
-      layout_config = {
-         width = 0.9,
-         height = 0.6,
-         preview_cutoff = 120,
-         horizontal = {preview_width = 0.5},
-         vertical = {preview_height = 0.5},
-         borders = true,
-         border = {
-            {"╭", "FloatBorder"},
-            {"─", "FloatBorder"},
-            {"╮", "FloatBorder"},
-            {"│", "FloatBorder"},
-            {"╯", "FloatBorder"},
-            {"─", "FloatBorder"},
-            {"╰", "FloatBorder"},
-            {"│", "FloatBorder"},
-         },
-         borderhighlight = "FloatBorder",
-         bordercolor = "red",
-         prompt_position = 'top',
-         padding = {
-            top = 10,
-            bottom = 10,
-            left = 10,
-            right = 10,
-         },
-      },
-   })
+vim.api.nvim_set_keymap('n', '<leader>gd', ':GoDoc<CR>', {noremap = true, silent = true})
+
+-- Auto Completion setup. We will use ale for error checking and will use cmp for auto compeltion
+-- Fonts : codicons.ttf 
+local cmp_kinds = {
+  Text = '  ',
+  Method = '  ',
+  Function = '  ',
+  Constructor = '  ',
+  Field = '  ',
+  Variable = '  ',
+  Class = '  ',
+  Interface = '  ',
+  Module = '  ',
+  Property = '  ',
+  Unit = '  ',
+  Value = '  ',
+  Enum = '  ',
+  Keyword = '  ',
+  Snippet = '  ',
+  Color = '  ',
+  File = '  ',
+  Reference = '  ',
+  Folder = '  ',
+  EnumMember = '  ',
+  Constant = '  ',
+  Struct = '  ',
+  Event = '  ',
+  Operator = '  ',
+  TypeParameter = '  ',
+}
+
+
+  -- Set up nvim-cmp.
+  local cmp = require'cmp'
+
+  cmp.setup({
+    formatting = {
+        format = function(_, vim_item)
+            vim_item.kind = (cmp_kinds[vim_item.kind] or '') .. vim_item.kind
+            return vim_item
+        end,
+    },
+    snippet = {
+      -- REQUIRED - you must specify a snippet engine
+      expand = function(args)
+        vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+        -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+        -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+        -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+      end,
+    },
+    window = {
+      completion = cmp.config.window.bordered(),
+      documentation = cmp.config.window.bordered(),
+    },
+    mapping = cmp.mapping.preset.insert({
+      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-e>'] = cmp.mapping.abort(),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    }),
+    sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'vsnip' }, -- For vsnip users.
+      -- { name = 'luasnip' }, -- For luasnip users.
+      -- { name = 'ultisnips' }, -- For ultisnips users.
+      -- { name = 'snippy' }, -- For snippy users.
+    }, {
+      { name = 'buffer' },
+    })
+  })
+
+  -- Set configuration for specific filetype.
+  cmp.setup.filetype('gitcommit', {
+    sources = cmp.config.sources({
+      { name = 'git' }, -- You can specify the `git` source if [you were installed it](https://github.com/petertriho/cmp-git).
+    }, {
+      { name = 'buffer' },
+    })
+  })
+
+  -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+  cmp.setup.cmdline({ '/', '?' }, {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+      { name = 'buffer' }
+    }
+  })
+
+  -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+  cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = cmp.config.sources({
+      { name = 'path' }
+    }, {
+      { name = 'cmdline' }
+    })
+  })
+
+cmp.setup.cmdline(':', {
+  sources = { --[[ your sources ]] },
+  enabled = function()
+    -- Set of commands where cmp will be disabled
+    local disabled = {
+        IncRename = true
+    }
+    -- Get first word of cmdline
+    local cmd = vim.fn.getcmdline():match("%S+")
+    -- Return true if cmd isn't disabled
+    -- else call/return cmp.close(), which returns false
+    return not disabled[cmd] or cmp.close()
+  end
+}) 
+
+local capabilities = require('cmp_nvim_lsp').default_capabilities() --nvim-cmp
+
+local on_attach = function(client, bufnr)
+  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
+  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 end
-vim.api.nvim_set_keymap('n', '<leader>gd', ':lua GoDocWithTelescope()<CR>', {noremap = true, silent = true})
+local nvim_lsp = require('lspconfig')
+
+-- setup languages 
+-- GoLang
+nvim_lsp['gopls'].setup{
+  cmd = {'gopls'},
+  -- on_attach = on_attach,
+  capabilities = capabilities,
+  settings = {
+    gopls = {
+      experimentalPostfixCompletions = true,
+      analyses = {
+        unusedparams = true,
+        shadow = true,
+      },
+      staticcheck = true,
+    },
+  },
+  init_options = {
+    usePlaceholders = true,
+  }
+}
