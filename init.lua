@@ -5,10 +5,10 @@ vim.cmd('source ~/.vimrc')
 vim.opt.termguicolors = true
 
 -- Set text width to 80 characters
-vim.opt.textwidth = 80
+-- vim.opt.textwidth = 80
 
 -- Automatically wrap text when saving a file
-vim.cmd('highlight ColorColumn ctermbg=gray')
+-- vim.cmd('highlight ColorColumn ctermbg=gray')
 
 -- Blink the cursor
 --vim.cmd('set guicursor=i:blinkwait700-blinkon400-blinkoff250')
@@ -20,6 +20,7 @@ vim.cmd('set guicursor=n-v-c-sm:block,i-ci-ve:ver25-Cursor,r-cr-o:hor20')
 
 -- set leader key
 -- vim.g.mapleader = ','
+-- Folding RUle
 
 -- install plug if not already installed
 local plug_path = vim.fn.stdpath('data') .. '/plugged/plug.vim'
@@ -47,13 +48,21 @@ Plug 'rohit-px2/nvui'
 Plug 'NvChad/nvim-colorizer.lua'
 
 -- function scope in status line
-Plug 'nvim-treesitter/nvim-treesitter'
-Plug 'SmiteshP/nvim-gps'
+-- Plug 'nvim-treesitter/nvim-treesitter'
+-- Plug 'SmiteshP/nvim-gps'
 
 Plug 'neovim/nvim-lspconfig'
 -- Plug 'fatih/vim-go'
+-- Move to coc, Keeping this for golang
 Plug 'dense-analysis/ale'
 Plug 'preservim/tagbar'
+
+
+-- Language support
+Plug 'tpope/vim-projectionist'
+Plug 'neoclide/coc.nvim'
+Plug 'jiangmiao/auto-pairs'
+
 
 -- Neo AI plugins
 Plug 'MunifTanjim/nui.nvim'
@@ -69,16 +78,22 @@ Plug 'numToStr/Comment.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'stevearc/dressing.nvim'
 Plug 'akinsho/flutter-tools.nvim'
+Plug 'dart-lang/dart-vim-plugin'
+
 
 -- Plug 'sebdah/vim-delve'
 
 -- Golang development
 Plug 'fatih/vim-go'
-Plug 'AndrewRadev/splitjoin.vim'
-Plug 'SirVer/ultisnips'
-Plug 'ctrlpvim/ctrlp.vim'
+Plug 'ray-x/go.nvim'
 
+-- Telescope extension
+Plug 'nvim-lua/popup.nvim'
+Plug 'nvim-telescope/telescope-media-files.nvim'
+Plug 'LukasPietzschmann/telescope-tabs'
+Plug 'arjunmahishi/flow.nvim'
 vim.call('plug#end')
+
 
 -- Go Plugin configuration
 vim.cmd[[
@@ -89,118 +104,52 @@ let g:go_highlight_functions = 1
 let g:go_highlight_function_calls = 1
 let g:go_highlight_operators = 1
 let g:go_highlight_extra_types = 1
-nnoremap <leader>gd <cmd>Telescope gopls document_symbols<cr>
-nnoremap <leader>gD <cmd>Telescope gopls definitions<cr>
 ]]
 
 
 
 vim.cmd[[
-    let g:ale_linters = {'python': ['flake8', 'mypy'],
-    \'cpp': ['cc', 'clang', 'cppcheck']
-    \}
-    let g:ale_fixers = {'*':[], 'python': ['autoimport', 'black', 'isort'],
-    \'cpp': ['clang-format'],
-    \'dart': ['dartfmt', 'dart-format']
-    \}
-    let g:ale_linters_ignore = {'cpp': ['clangcheck', 'clangtidy']}
-    let g:ale_cpp_cc_options = "-std=c++17 -Wall"
-    let g:ale_cpp_clangd_options = "-std=c++17 -Wall"
+    let g:gruvbox_contrast_dark = 'hard'
+    let g:gruvbox_invert_selection=0
+    let g:dart_format_on_save = 1
+    let g:dartfmt_options = ['--fix', '--line-length 120']
 
-    let g:ale_lint_on_save = 1
-    let g:ale_fix_on_save = 1
-    let g:ale_lint_on_enter = 0
+    let g:coc_global_extensions = [
+      \ 'coc-snippets',
+      \ 'coc-tsserver',
+      \ 'coc-eslint', 
+      \ 'coc-prettier', 
+      \ 'coc-json', 
+      \ 'coc-flutter',
+      \ 'coc-snippets',
+      \ 'coc-yaml',
+      \ 'coc-tslint-plugin',
+      \ 'coc-tsserver',
+      \ 'coc-emmet',
+      \ 'coc-css',
+      \ 'coc-html',
+      \ 'coc-json',
+      \ ]
 
-    " ale completion engine
-    let g:ale_completion_enabled = 1
-
-    let g:ale_set_balloons = 1
-    let g:ale_open_list = 0
-    let g:ale_sign_error = '●'
-    let g:ale_sign_warning = '.'
-    let g:ale_floating_window_border = repeat([''], 8)
-    let g:ale_set_highlights = 1
-    let g:ale_virtualtext_cursor = 'disabled'
-
+    nmap <silent> gd <Plug>(coc-definition)
+    nmap <silent> gy <Plug>(coc-type-definition)
+    nmap <silent> gi <Plug>(coc-implementation)
+    nmap <silent> gr <Plug>(coc-references)
 ]]
 
 vim.g.go_doc_popup_window = 1
-require('lspconfig').gopls.setup{}
 
 
 -- alternatively you can override the default configs
 require("flutter-tools").setup {
-  ui = {
-    -- the border type to use for all floating windows, the same options/formats
-    -- used for ":h nvim_open_win" e.g. "single" | "shadow" | {<table-of-eight-chars>}
-    border = "rounded"
-    -- This determines whether notifications are show with `vim.notify` or with the plugin's custom UI
-    -- please note that this option is eventually going to be deprecated and users will need to
-    -- depend on plugins like `nvim-notify` instead.
-  },
-  decorations = {
-    statusline = {
-      -- set to true to be able use the 'flutter_tools_decorations.app_version' in your statusline
-      -- this will show the current version of the flutter app from the pubspec.yaml file
-      app_version = false,
-      -- set to true to be able use the 'flutter_tools_decorations.device' in your statusline
-      -- this will show the currently running device if an application was started with a specific
-      -- device
-      device = false,
-      -- set to true to be able use the 'flutter_tools_decorations.project_config' in your statusline
-      -- this will show the currently selected project configuration
-      project_config = false,
-    }
-  },
-  fvm = false, -- takes priority over path, uses <workspace>/.fvm/flutter_sdk if enabled
   widget_guides = {
     enabled = true,
   },
-  closing_tags = {
-    highlight = "ErrorMsg", -- highlight for the closing tag
-    prefix = ">", -- character to use for close tag e.g. > Widget
-    enabled = false -- set to false to disable
-  },
-  dev_log = {
-    enabled = true,
-    notify_errors = false, -- if there is an error whilst running then notify the user
-    open_cmd = "tabedit", -- command to use to open the log buffer
-  },
-  dev_tools = {
-    autostart = false, -- autostart devtools server if not detected
-    auto_open_browser = false, -- Automatically opens devtools in the browser
-  },
-  outline = {
-    open_cmd = "30vnew", -- command to use to open the outline buffer
-    auto_open = false -- if true this will open the outline automatically when it is first populated
-  },
-  lsp = {
-    color = { -- show the derived colours for dart variables
-      enabled = false, -- whether or not to highlight color variables at all, only supported on flutter >= 2.10
-      background = false, -- highlight the background
-      background_color = nil, -- required, when background is transparent (i.e. background_color = { r = 19, g = 17, b = 24},)
-      foreground = false, -- highlight the foreground
-      virtual_text = true, -- show the highlight using virtual text
-      virtual_text_str = "â– ", -- the virtual text character to highlight
-    },
-    on_attach = my_custom_on_attach,
-    capabilities = my_custom_capabilities, -- e.g. lsp_status capabilities
-    --- OR you can specify a function to deactivate or change or control how the config is created
-    -- see the link below for details on each option:
-    -- https://github.com/dart-lang/sdk/blob/master/pkg/analysis_server/tool/lsp_spec/README.md#client-workspace-configuration
-    settings = {
-      showTodos = true,
-      completeFunctionCalls = true,
-      analysisExcludedFolders = {"<path-to-flutter-sdk-packages>"},
-      renameFilesWithClasses = "prompt", -- "always"
-      enableSnippets = true,
-      updateImportsOnRename = true, -- Whether to update imports and other directives when files are renamed. Required for `FlutterRename` command.
-    }
-  }
+
 }
-
-
-
+require("telescope").load_extension("flutter")
+require('telescope').load_extension('media_files')
+require('telescope-tabs').setup{}
 -- Nerd tree / nvim tree
 -- disable netrw at the very start of your init.lua (strongly advised)
 vim.g.loaded_netrw = 1
@@ -279,7 +228,16 @@ require('telescope').setup {
         file_previewer = require'telescope.previewers'.vim_buffer_cat.new,
         grep_previewer = require'telescope.previewers'.vim_buffer_vimgrep.new,
         qflist_previewer = require'telescope.previewers'.vim_buffer_qflist.new,
-    }
+    },
+    extensions = {
+        media_files = {
+            -- filetypes whitelist
+            -- defaults to {"png", "jpg", "mp4", "webm", "pdf"}
+            filetypes = {"png", "webp", "jpg", "jpeg"},
+            -- find command (defaults to `fd`)
+            find_cmd = "rg"
+        },
+    },
 }
 
 
@@ -292,6 +250,8 @@ map('n', '<Leader>fh', '<Cmd>Telescope help_tags<CR>', { noremap = true, silent 
 map('n', '<Leader>ee', '<Cmd>NvimTreeToggle<CR>', {noremap = true, silent = true})
 map('n', '<Leader>ef', '<Cmd>NvimTreeFocus<CR>', {noremap = true, silent = true})
 map('n', '<Leader>er', '<Cmd>NvimTreeRefresh<CR>', {noremap = true, silent = true})
+map('n', '<Leader>ft', '<Cmd>FlutterOutlineToggle<CR>', {noremap = true, silent = true})
+map('n', '<Leader>tt', '<Cmd>Telescope telescope-tabs list_tabs<CR>', {noremap = true, silent = true})
 
 vim.keymap.set("n", "<leader>fs", function()
   require("neofs").open()
@@ -373,7 +333,7 @@ require'barbar'.setup {
   },
 
 }
-
+require('go').setup()
 
 require('neoai').setup{
     -- Below are the default options, feel free to override what you would like changed
@@ -468,7 +428,7 @@ function GoDocWithTelescope()
             {"│", "FloatBorder"},
          },
          borderhighlight = "FloatBorder",
-         bordercolor = "white",
+         bordercolor = "red",
          prompt_position = 'top',
          padding = {
             top = 10,
