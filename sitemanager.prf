@@ -1,0 +1,15 @@
+# Unison preferences
+label = sitemanager
+root = /home/adeesh/workspace/site-manager
+root = ssh://adeesh@34.93.129.221//home/adeesh/workspace/
+sshargs = -C
+
+ignore = Name {vuSmartMaps.tar.gz}
+ignore = Name {kubernetes.tar.gz}
+ignore = Name {sm-qa.tar.gz}
+backup = Name *
+maxbackups = 5
+batch = true
+# Automatically take the newer version when there's a conflict
+prefer = newer
+retry = 1
