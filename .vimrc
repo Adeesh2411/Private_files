@@ -30,7 +30,7 @@ command W w !sudo tee % > /dev/null
 " => VIM user interface
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Set 10 lines to the cursor - when moving vertically using j/k
-set so=10
+set so=1
 
 " Avoid garbled characters in Chinese language windows OS
 let $LANG='en'
@@ -112,10 +112,6 @@ if $COLORTERM == 'gnome-terminal'
     set t_Co=256
 endif
 
-try
-    colorscheme desert
-catch
-endtry
 
 set background=dark
 
@@ -210,7 +206,7 @@ map <leader>h :bprevious<cr>
 map <leader>tn :tabnew<cr>
 map <leader>to :tabonly<cr>
 map <leader>tc :tabclose<cr>
-map <leader>tm :tabmove
+map <leader>tm :tabmove<cr>
 map <leader>t<leader> :tabnext
 set pastetoggle=<F10>
 " Let 'tl' toggle between this and the last accessed tab
@@ -228,8 +224,8 @@ map <leader>cd :cd %:p:h<cr>:pwd<cr>
 
 " Specify the behavior when switching between buffers
 try
-  set switchbuf=useopen,usetab,newtab
-  set stal=2
+set switchbuf=useopen,usetab,newtab
+set stal=2
 catch
 endtry
 
@@ -260,17 +256,17 @@ vmap <M-j> :m'>+<cr>`<my`>mzgv`yo`z
 vmap <M-k> :m'<-2<cr>`>my`<mzgv`yo`z
 
 if has("mac") || has("macunix")
-  nmap <D-j> <M-j>
-  nmap <D-k> <M-k>
-  vmap <D-j> <M-j>
-  vmap <D-k> <M-k>
+nmap <D-j> <M-j>
+nmap <D-k> <M-k>
+vmap <D-j> <M-j>
+vmap <D-k> <M-k>
 endif
 
 " Delete trailing white space on save, useful for Python and CoffeeScript ;)
 func! DeleteTrailingWS()
-  exe "normal mz"
-  %s/\s\+$//ge
-  exe "normal `z"
+exe "normal mz"
+%s/\s\+$//ge
+exe "normal `z"
 endfunc
 autocmd BufWrite *.py :call DeleteTrailingWS()
 autocmd BufWrite *.coffee :call DeleteTrailingWS()
@@ -320,18 +316,15 @@ map <leader>sp [s
 map <leader>sa zg
 map <leader>s? z=
 
-" Prompt for a command to run
-map <Leader>vp :VimuxPromptCommand<CR>
-
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Misc
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Remove the Windows ^M - when the encodings gets messed up
-noremap <Leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
+noremap <leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
 
-" Quickly open a buffer for scribble
-map <leader>q :e ~/buffer<cr>
+" fast close the editor
+map <leader>q :q!<cr>
 
 " Quickly open a markdown buffer for scribble
 map <leader>x :e ~/buffer.md<cr>
@@ -456,22 +449,12 @@ endif
 " Specify a directory for plugins
 " - For Neovim: ~/.local/share/nvim/plugged
 " - Avoid using standard Vim directory names like 'plugin'
-call plug#begin('~/.vim/plugged')
+call plug#begin('~/.vim/plugged_folder')
 
 " Search tool similar to grep
 Plug 'mileszs/ack.vim'
 
 " Asynchronoues Lint Engine Provides annoying arrow missing import
-" Plug 'dense-analysis/ale'
-
-" Full path fuzzy finder
-"Plug 'ctrlpvim/ctrlp.vim'
-
-" NERD Commenter - comment functions so powerful w/ <leader> + cc
-" Plug 'scrooloose/nerdcommenter'
-
-" The NERDTree
-"Plug 'scrooloose/nerdtree'
 
 " Git status on NERDTree
 Plug 'Xuyuanp/nerdtree-git-plugin'
@@ -494,6 +477,7 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'tomasiser/vim-code-dark'
 Plug 'mhinz/vim-janah'
 Plug 'dracula/vim', { 'as': 'dracula' }
+Plug 'morhetz/gruvbox'
 
 " Auto end for structures
 Plug 'tpope/vim-endwise'
@@ -511,14 +495,17 @@ Plug 'nathanaelkane/vim-indent-guides'
 " Adds Icons to Your Plugins
 Plug 'ryanoasis/vim-devicons'
 Plug 'tpope/vim-surround'
+
 " Used for amazon plugins
 " Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
 " Make sure you use single quotes
 " Shorthand notation; fetches https://github.com/junegunn/vim-easy-align
 Plug 'junegunn/vim-easy-align'
 Plug 'heavenshell/vim-pydocstring', { 'do': 'make install', 'for': 'python' }
 
 " Plug 'yaegassy/coc-pydocstring', {'do': 'yarn install --frozen-lockfile'}
+
 " Any valid git URL is allowed
 "Plug 'https://github.com/junegunn/vim-github-dashboard.git'
 
@@ -555,11 +542,34 @@ Plug 'rhysd/git-messenger.vim'
 
 Plug 'mkitt/tabline.vim'
 
+Plug 'nvie/vim-flake8'
+
+Plug 'tell-k/vim-autopep8'
+
+Plug 'yhat/vim-docstring'
+
+" Multiple color scheme
+Plug 'rafi/awesome-vim-colorschemes'
 " Debugger for python
 " add viminspector 
 
+
+" for CPP
+Plug 'bfrg/vim-cpp-modern'
+
+" for terraform
+Plug 'hashivim/vim-terraform'
 " Initialize plugin system
+Plug 'dart-lang/dart-vim-plugin'
+Plug 'thosakwe/vim-flutter'
+
+" color picker
+Plug 'KabbAmine/vCoolor.vim'
+
+Plug 'ap/vim-css-color'
+
 call plug#end()
+
 
 "execute pathogen#infect()
 set backspace=indent,eol,start
@@ -573,7 +583,7 @@ syntax on
 :set confirm
 :set mouse=a
 :nnoremap <space> i<space><esc>
-:set clipboard=unnamed
+:set clipboard=unnamedplus
 
 noremap <Leader>y "+y
 noremap <Leader>p "+p
@@ -590,6 +600,80 @@ nmap <F2> :TagbarToggle<CR>
 " git messenger
 let g:git_messenger_floating_win_opts = { 'border': 'single' }
 let g:git_messenger_popup_content_margins = v:false
+
+" ale configuration
+" Set this. Airline will handle the rest.
+let g:airline#extensions#ale#enabled = 1
+
+" To disable the ale altogether
+" let g:ale_enabled = 0
+"function! LinterStatus() abort
+    "let l:counts = ale#statusline#Count(bufnr(''))
+    "let l:all_errors = l:counts.error + l:counts.style_error
+    "let l:all_non_errors = l:counts.total - l:all_errors
+    "return l:counts.total == 0 ? 'OK' : printf(
+        "\   '%d⨉ %d⚠ ',
+        "\   all_non_errors,
+        "\   all_errors
+        "\)
+"endfunction
+"set statusline+=%=
+"set statusline+=\ %{LinterStatus()}
+"
+
+
+" Morden CPP
+" Disable function highlighting (affects both C and C++ files)
+let g:cpp_function_highlight = 1
+
+" Enable highlighting of C++11 attributes
+let g:cpp_attributes_highlight = 1
+
+" Highlight struct/class member variables (affects both C and C++ files)
+let g:cpp_member_highlight = 1
+
+" Put all standard C and C++ keywords under Vim's highlight group 'Statement'
+" (affects both C and C++ files)
+let g:cpp_simple_highlight = 1
+
+" flake8
+" ref : https://linuxtut.com/en/4ae1b9ac504567ad4142/ 
+"autopep8<sift>+Run with f
+function! Preserve(command)
+    " Save the last search.
+    let search = @/
+    " Save the current cursor position.
+    let cursor_position = getpos('.')
+    " Save the current window position.
+    normal! H
+    let window_position = getpos('.')
+    call setpos('.', cursor_position)
+    " Execute the command.
+    execute a:command
+    " Restore the last search.
+    let @/ = search
+    " Restore the previous window position.
+    call setpos('.', window_position)
+    normal! zt
+    " Restore the previous cursor position.
+    call setpos('.', cursor_position)
+endfunction
+function! Autopep8()
+    call Preserve(':silent %!autopep8 --ignore=E501 -')
+endfunction
+autocmd FileType python nnoremap <S-f> :call Autopep8()<CR>
+
+" Python Folding the docstrings
+autocmd FileType python setlocal foldenable foldmethod=syntax
+
+" see first line
+set foldtext=getline(v:v:foldstart)
+" avoid dash
+set fillchars=fold:\ 
+
+"hi Folded term=standout ctermfg=5 ctermbg=7 guifg=Black guibg=#e3c1a5
+
+
 
 " Normal color in popup window with 'CursorLine'
 hi link gitmessengerPopupNormal CursorLine
@@ -612,8 +696,9 @@ endfunction
 autocmd FileType gitmessengerpopup call <SID>setup_git_messenger_popup()
 
 
-":set relativenumber number
-:set nonumber
+" comment this to turn off relative line number
+:set relativenumber number
+:set number
 :set cursorline
 ":augroup numbertoggle
 ":  autocmd!
@@ -646,6 +731,8 @@ nnoremap tc  :tabclose<CR>
 "nmap <C-D><C-V> :DiffVifm<CR>
 "nmap <C-T><C-V> :TabVifm<CR>
 
+let python_highlight_all=1
+
 let g:lasttab = 1
 nmap tt  :exe "tabn ".g:lasttab<CR>
 au TabLeave * let g:lasttab = tabpagenr()
@@ -662,57 +749,12 @@ let g:closetag_filenames = '*.html,*.xhtml,*.phtml'
 " files.
 let g:closetag_xhtml_filenames = '*.xhtml,*.jsx, *.js'
 
-" Open NERDTree on open without specifying file
-"autocmd StdinReadPre * let s:std_in=1
-"autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
-
-" Open NERDTree on open dir
-"autocmd StdinReadPre * let s:std_in=1
-"autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
-
-" NERDTree Bindings
-"map <C-n> :NERDTreeTabsToggle<CR>
-"autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-
-" always open the files in new tab
-" let NERDTreeMapOpenInTab='<ENTER>'
-
-" Add spaces after comment delimiters by default
-"let g:NERDSpaceDelims = 1
-
-" Use compact syntax for prettified multi-line comments
-"let g:NERDCompactSexyComs = 1
-
-" Align line-wise comment delimiters flush left instead of following code indentation
-"let g:NERDDefaultAlign = 'left'
-
-" Set a language to use its alternate delimiters by default
-"let g:NERDAltDelims_java = 1
-
-" Add your own custom formats or override the defaults
-"let g:NERDCustomDelimiters = { 'c': { 'left': '/**','right': '*/' } }
-
-" Allow commenting and inverting empty lines (useful when commenting a region)
-"let g:NERDCommentEmptyLines = 1
-
-" Enable trimming of trailing whitespace when uncommenting
-"let g:NERDTrimTrailingWhitespace = 1
-
-" Show hidden files by default (toggle w/ shift+i)
-"let g:NERDTreeShowHidden = 1
-
-" Sync VISUAL with minimap highlights
-"let g:minimap_highlight='Visual'
-
-" Nerd Tree window width
-"let NERDTreeWinSize=30
-
 " Highlight tab name
 function! HiTabs()
     syntax match TAB /\t/ containedin=ALL
 highlight TAB ctermbg=red ctermfg=white cterm=underline
 endfunction
-au BufEnter,BufRead * call HiTabs()
+"au BufEnter,BufRead * call HiTabs()
 
 
 " Syntastic Defaults
@@ -730,35 +772,6 @@ set statusline+=%*
 let g:ctrlp_map = '<c-p>'
 let g:ctrlp_cmd = 'CtrlP'
 
-" NERDTree Git symbols
-let g:NERDTreeGitStatusIndicatorMapCustom = {
-   \ "Modified"  : "*",
-    \ "Staged"    : "+",
-    \ "Untracked" : "?",
-    \ "Renamed"   : "➜",
-    \ "Unmerged"  : "═",
-    \ "Deleted"   : "X",
-    \ "Dirty"     : "✗",
-    \ "Clean"     : "✔︎",
-    \ 'Ignored'   : '☒',
-    \ "Unknown"   : "?"
-    \ }
-
-"noremap <F6> :NERDTreeToggle<CR>
-"nnoremap <silent> <leader>n :NERDTreeFind<CR>
-
-"let NERDTreeMinimalUI = 1
-"let NERDTreeDirArrows = 1
-"let NERDTreeQuitOnOpen = 1
-"let NERDTreeAutoDeleteBuffer = 1
-"let g:NERDTreeWinPos = "right"
-
-" NERDTree auto refresh
-"autocmd BufWritePost * NERDTreeFocus | execute 'normal R' | wincmd p
-
-" NERDTree auto close
-"autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-
 " YCM Settings
 " let g:ycm_autoclose_preview_window_after_insertion = 1
 " highlight NonText ctermfg=12
@@ -769,11 +782,21 @@ let g:NERDTreeGitStatusIndicatorMapCustom = {
 " colorscheme codedark
 " colorscheme molokai
 " colorscheme monokai
-colorscheme dracula
-" let g:molokai_original = 1
+" colorscheme dracula
+" colorscheme gruvbox
+
+
+
+" c++ file comiple and run
+" nmap <C-R> :!g++ -std=c++11 % && ./a.out < input.txt <CR>
+
+
+" Add the template file 
+nnoremap <space>t :-1read $HOME/.vim/templates/cpp_sample<CR>/{<CR>o
+
 
 " let g:airline_theme = 'minimalist'
-let g:airline_theme = 'codedark'
+" let g:airline_theme = 'codedark'
 
 highlight Comment cterm=italic gui=italic
 
@@ -781,11 +804,54 @@ highlight Comment cterm=italic gui=italic
 syn region pythonDocstring start=+^\s*[uU]\?[rR]\?"""+ end=+"""+ keepend excludenl contains=pythonEscape,@Spell,pythonDoctest,pythonDocTest2,pythonSpaceError
 syn region pythonDocstring start=+^\s*[uU]\?[rR]\?'''+ end=+'''+ keepend excludenl contains=pythonEscape,@Spell,pythonDoctest,pythonDocTest2,pythonSpaceError
 
+" Match the brackets
+"inoremap { {}<Esc>ha
+"inoremap ( ()<Esc>ha
+"inoremap [ []<Esc>ha
+"inoremap " ""<Esc>ha
+"inoremap ' ''<Esc>ha
+"inoremap ` ``<Esc>ha
+
 " disable the bell sound
 set belloff=all
 
+"blink the cursor
+"set guicursor+=a:blinkon0
+"set guicursor+=i:blinkon0
+"set guicursor+=n:blinkon0
+set t_vb=
+
 " Override tab behaviour for Golang
 autocmd FileType go setlocal noexpandtab
+au BufRead,BufNewFile *.go setlocal textwidth=80
+
+" Override tab behaviour for dart file
+autocmd FileType dart setlocal shiftwidth=2
+autocmd FileType dart setlocal softtabstop=2
+
+
+
+
+" if exists('$TMUX')
+"    let &t_SI .= "\ePtmux;\e\e[=1c\e\\"
+"    let &t_EI .= "\ePtmux;\e\e[=2c\e\\"
+" else
+"    let &t_SI .= "\e[=1c"
+"    let &t_EI .= "\e[=2c"
+"endif
+
+
+" let &t_SI.="\e[5 q" "SI = INSERT mode
+" let &t_SR.="\e[4 q" "SR = REPLACE mode
+" let &t_EI.="\e[1 q" "EI = NORMAL mode (ELSE)
+
+highlight Cursor guifg=white guibg=black
+highlight iCursor guifg=white guibg=steelblue
+set guicursor=n-v-c:block-Cursor
+set guicursor+=i:ver100-iCursor
+set guicursor+=n-v-c:blinkon100
+set guicursor+=i:blinkwait10
+
 
 " Put swap, backup and undo files in fixed directories,
 " instead of the working directory of the file being edited
