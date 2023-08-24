@@ -48,7 +48,7 @@ Plug 'rohit-px2/nvui'
 Plug 'NvChad/nvim-colorizer.lua'
 
 -- function scope in status line
--- Plug 'nvim-treesitter/nvim-treesitter'
+Plug 'nvim-treesitter/nvim-treesitter'
 -- Plug 'SmiteshP/nvim-gps'
 
 Plug 'neovim/nvim-lspconfig'
@@ -87,6 +87,7 @@ Plug 'dart-lang/dart-vim-plugin'
 Plug 'fatih/vim-go'
 Plug 'ray-x/go.nvim'
 
+Plug 'jodosha/vim-godebug'
 -- Telescope extension
 Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-telescope/telescope-media-files.nvim'
@@ -104,7 +105,7 @@ Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/vim-vsnip'
 
-
+Plug 'ellisonleao/gruvbox.nvim'
 Plug 'ray-x/lsp_signature.nvim'
 vim.call('plug#end')
 
@@ -127,6 +128,7 @@ vim.cmd[[
     let g:gruvbox_invert_selection=0
     let g:dart_format_on_save = 1
     let g:dartfmt_options = ['--fix', '--line-length 120']
+    set background=dark
 ]]
 
 
@@ -162,14 +164,43 @@ vim.cmd[[
 
 vim.g.go_doc_popup_window = 1
 
+-- Avoid getting the first suggestion on Enter
+vim.o.completeopt = "menuone,noselect,preview"
 
+
+-- setup must be called before loading the colorscheme
+-- Default options:
+require("gruvbox").setup({
+  undercurl = true,
+  underline = true,
+  bold = true,
+  italic = {
+    strings = true,
+    comments = true,
+    operators = false,
+    folds = true,
+  },
+  strikethrough = true,
+  invert_selection = true,
+  invert_signs = false,
+  invert_tabline = false,
+  invert_intend_guides = false,
+  inverse = true, -- invert background for search, diffs, statuslines and errors
+  contrast = "hard", -- can be "hard", "soft" or empty string
+  palette_overrides = {},
+  overrides = {},
+  dim_inactive = false,
+  transparent_mode = false,
+})
+vim.o.background = "dark"
+vim.cmd("colorscheme gruvbox")
 
 require('go').setup()
 
-require "lsp_signature".setup({
-    bind = false, -- This is mandatory, otherwise border config won't get registered.
-    max_width = 100,
-  })
+-- require "lsp_signature".setup({
+--    bind = false, -- This is mandatory, otherwise border config won't get registered.
+--    max_width = 100,
+--  })
 
 -- alternatively you can override the default configs
 require('flutter-tools').setup{
@@ -434,6 +465,7 @@ require('neoai').setup{
 }
 
 vim.api.nvim_set_keymap('n', '<leader>gd', ':GoDoc<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('n', '<leader>b', ':GoToggleBreakpoint<CR>', {noremap = true, silent = true})
 
 -- Auto Completion setup. We will use ale for error checking and will use cmp for auto compeltion
 -- Fonts : codicons.ttf 
@@ -494,7 +526,7 @@ local cmp_kinds = {
       ['<C-f>'] = cmp.mapping.scroll_docs(4),
       ['<C-Space>'] = cmp.mapping.complete(),
       ['<C-e>'] = cmp.mapping.abort(),
-      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+      ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     }),
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
