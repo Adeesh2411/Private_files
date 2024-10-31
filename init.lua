@@ -12,11 +12,7 @@ vim.opt.termguicolors = true
 
 -- Blink the cursor
 --vim.cmd('set guicursor=i:blinkwait700-blinkon400-blinkoff250')
-vim.cmd('set guicursor=n-v-c-sm:block,i-ci-ve:ver25-Cursor,r-cr-o:hor20')
--- change the cursor style
--- vim.cmd(let &t_SI.="\e[5 q")
--- vim.cmd(let &t_SR.="\e[4 q")
--- vim.cmd(let &t_EI.="\e[1 q")
+vim.cmd('set guicursor=n-v-c-sm:block,i-ci-ve:ver25-Cursor,r-cr-o:hor20,i:blinkwait700-blinkon400-blinkoff250')
 
 -- set leader key
 -- vim.g.mapleader = ','
@@ -68,7 +64,7 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'MunifTanjim/nui.nvim'
 Plug 'Bryley/neoai.nvim'
 
--- nerd tree kind of 
+-- nerd tree kind of
 Plug 'nvim-tree/nvim-tree.lua'
 Plug 'vifm/vifm.vim'
 
@@ -86,7 +82,9 @@ Plug 'dart-lang/dart-vim-plugin'
 -- Golang development
 Plug 'fatih/vim-go'
 Plug 'ray-x/go.nvim'
-
+Plug 'leoluz/nvim-dap-go'
+Plug 'mfussenegger/nvim-dap'
+Plug 'buoto/gotests-vim'
 Plug 'jodosha/vim-godebug'
 -- Telescope extension
 Plug 'nvim-lua/popup.nvim'
@@ -107,6 +105,23 @@ Plug 'hrsh7th/vim-vsnip'
 
 Plug 'ellisonleao/gruvbox.nvim'
 Plug 'ray-x/lsp_signature.nvim'
+Plug 'ray-x/guihua.lua'
+
+-- leetcode
+Plug 'kawre/leetcode.nvim'
+Plug 'rcarriga/nvim-notify'
+
+-- git signs
+Plug 'lewis6991/gitsigns.nvim'
+
+-- python
+Plug 'williamboman/mason.nvim'
+
+-- popup new window
+Plug 'voldikss/vim-floaterm'
+
+-- sql
+Plug 'nanotee/sqls.nvim'
 vim.call('plug#end')
 
 
@@ -122,6 +137,11 @@ let g:go_highlight_extra_types = 1
 ]]
 
 
+require("mason").setup()
+require'lspconfig'.pyright.setup{}
+
+-- golang, generate the interface for struct
+
 -- Flutter Configuration
 vim.cmd[[
     let g:gruvbox_contrast_dark = 'hard'
@@ -133,9 +153,9 @@ vim.cmd[[
 
 
 -- ALE Configuration
-vim.cmd[[ 
+vim.cmd[[
     let g:ale_linters = {'python': ['flake8', 'mypy'],
-    \'cpp': ['cc', 'clang', 'cppcheck']
+    \'cpp': ['cc', 'cppcheck', 'g++']
     \}
     let g:ale_fixers = {'*':[], 'python': ['autoimport', 'black', 'isort'],
     \'cpp': ['clang-format'],
@@ -160,13 +180,81 @@ vim.cmd[[
     let g:ale_set_highlights = 1
     let g:ale_virtualtext_cursor = 'disabled'
     let g:ale_lint_on_insert_leave = 1
+
+    autocmd BufWritePre * :%s/\s\+$//e
 ]]
 
 vim.g.go_doc_popup_window = 1
 
 -- Avoid getting the first suggestion on Enter
 vim.o.completeopt = "menuone,noselect,preview"
+vim.opt.autochdir = true
 
+vim.notify = require("notify")
+
+require('lspconfig').sqls.setup{
+    on_attach = function(client, bufnr)
+        require('sqls').on_attach(client, bufnr)
+    end
+}
+
+-- go debugger
+require('dap-go').setup {
+  -- Additional dap configurations can be added.
+  -- dap_configurations accepts a list of tables where each entry
+  -- represents a dap configuration. For more details do:
+  -- :help dap-configuration
+  dap_configurations = {
+    {
+      -- Must be "go" or it will be ignored by the plugin
+      type = "go",
+      name = "Attach remote",
+      mode = "remote",
+      request = "attach",
+    },
+  },
+  -- delve configurations
+  delve = {
+    -- the path to the executable dlv which will be used for debugging.
+    -- by default, this is the "dlv" executable on your PATH.
+    path = "dlv",
+    -- time to wait for delve to initialize the debug session.
+    -- default to 20 seconds
+    initialize_timeout_sec = 20,
+    -- a string that defines the port to start delve debugger.
+    -- default to string "${port}" which instructs nvim-dap
+    -- to start the process in a random available port.
+    -- if you set a port in your debug configuration, its value will be
+    -- assigned dynamically.
+    port = "${port}",
+    -- additional args to pass to dlv
+    args = {},
+    -- the build flags that are passed to delve.
+    -- defaults to empty string, but can be used to provide flags
+    -- such as "-tags=unit" to make sure the test suite is
+    -- compiled during debugging, for example.
+    -- passing build flags using args is ineffective, as those are
+    -- ignored by delve in dap mode.
+    -- avaliable ui interactive function to prompt for arguments get_arguments
+    build_flags = {},
+    -- whether the dlv process to be created detached or not. there is
+    -- an issue on Windows where this needs to be set to false
+    -- otherwise the dlv server creation will fail.
+    -- avaliable ui interactive function to prompt for build flags: get_build_flags
+    detached = vim.fn.has("win32") == 0,
+    -- the current working directory to run dlv from, if other than
+    -- the current working directory.
+    cwd = nil,
+  },
+  -- options related to running closest test
+  tests = {
+    -- enables verbosity when running the test.
+    verbose = true,
+  },
+}
+
+-- gitsigns
+-- require('gitsigns').setup()
 
 -- setup must be called before loading the colorscheme
 -- Default options:
@@ -313,6 +401,11 @@ map('n', '<Leader>ef', '<Cmd>NvimTreeFocus<CR>', {noremap = true, silent = true}
 map('n', '<Leader>er', '<Cmd>NvimTreeRefresh<CR>', {noremap = true, silent = true})
 map('n', '<Leader>ft', '<Cmd>FlutterOutlineToggle<CR>', {noremap = true, silent = true})
 map('n', '<Leader>tt', '<Cmd>Telescope telescope-tabs list_tabs<CR>', {noremap = true, silent = true})
+map('n', '<Leader>rr', '<Cmd>!g++ -std=c++11 % && ./a.out < input.txt <CR>', {noremap = true, silent = true})
+map('n', '<Leader>td', '<Cmd>lua require("dap-go").debug_test() <CR>', {noremap = true, silent = true})
+
+
+-- nmap <C-R> :!g++ -std=c++11 % && ./a.out < input.txt <CR>
 
 vim.keymap.set("n", "<leader>fs", function()
   require("neofs").open()
@@ -334,10 +427,10 @@ require'barbar'.setup {
     -- Valid options to display the buffer index and -number are `true`, 'superscript' and 'subscript'
     buffer_index = false,
     buffer_number = false,
-    button = '',
+    button = '✖',
     -- Enables / disables diagnostic symbols
     diagnostics = {
-      [vim.diagnostic.severity.ERROR] = {enabled = true, icon = 'ﬀ'},
+      [vim.diagnostic.severity.ERROR] = {enabled = true, icon = '❗'},
       [vim.diagnostic.severity.WARN] = {enabled = false},
       [vim.diagnostic.severity.INFO] = {enabled = false},
       [vim.diagnostic.severity.HINT] = {enabled = true},
@@ -465,10 +558,10 @@ require('neoai').setup{
 }
 
 vim.api.nvim_set_keymap('n', '<leader>gd', ':GoDoc<CR>', {noremap = true, silent = true})
-vim.api.nvim_set_keymap('n', '<leader>b', ':GoToggleBreakpoint<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('n', '<leader>bp', ':GoToggleBreakpoint<CR>', {noremap = true, silent = true})
 
 -- Auto Completion setup. We will use ale for error checking and will use cmp for auto compeltion
--- Fonts : codicons.ttf 
+-- Fonts : codicons.ttf
 local cmp_kinds = {
   Text = '  ',
   Method = '  ',
@@ -522,10 +615,13 @@ local cmp_kinds = {
       documentation = cmp.config.window.bordered(),
     },
     mapping = cmp.mapping.preset.insert({
+      ['<Down>'] = cmp.mapping.select_next_item(),
+      ['<Up>'] = cmp.mapping.select_prev_item(),
       ['<C-b>'] = cmp.mapping.scroll_docs(-4),
       ['<C-f>'] = cmp.mapping.scroll_docs(4),
       ['<C-Space>'] = cmp.mapping.complete(),
       ['<C-e>'] = cmp.mapping.abort(),
+      ['<TAB>'] = cmp.mapping.select_next_item(),
       ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     }),
     sources = cmp.config.sources({
@@ -579,7 +675,7 @@ cmp.setup.cmdline(':', {
     -- else call/return cmp.close(), which returns false
     return not disabled[cmd] or cmp.close()
   end
-}) 
+})
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities() --nvim-cmp
 
@@ -591,7 +687,7 @@ local on_attach = function(client, bufnr)
 end
 local nvim_lsp = require('lspconfig')
 
--- setup languages 
+-- setup languages
 -- GoLang
 nvim_lsp['gopls'].setup{
   cmd = {'gopls'},
@@ -610,4 +706,34 @@ nvim_lsp['gopls'].setup{
   init_options = {
     usePlaceholders = true,
   }
+}
+
+-- python
+lspconfig = require("lspconfig")
+lspconfig.pylsp.setup {
+on_attach = custom_attach,
+settings = {
+    pylsp = {
+    plugins = {
+        -- formatter options
+        black = { enabled = true },
+        autopep8 = { enabled = false },
+        yapf = { enabled = false },
+        -- linter options
+        pylint = { enabled = false, executable = "pylint" },
+        pyflakes = { enabled = false },
+        pycodestyle = { enabled = false },
+        -- type checker
+        pylsp_mypy = { enabled = true },
+        -- auto-completion options
+        jedi_completion = { fuzzy = true },
+        -- import sorting
+        pyls_isort = { enabled = true },
+    },
+    },
+},
+flags = {
+    debounce_text_changes = 200,
+},
+capabilities = capabilities,
 }
